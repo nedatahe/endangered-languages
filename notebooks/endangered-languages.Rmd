@@ -1,0 +1,29 @@
+```{r}
+library(tidyverse)
+```
+
+```{r}
+UNESCO <- read_csv('../data/UNESCO-2011.csv')
+```
+
+```{r}
+UN <- read_csv('../data/UN-data.csv')
+```
+```{r}
+UNESCO <- UNESCO %>% 
+    mutate(Country = strsplit(Country, ",")) %>% 
+    unnest(Country)
+```
+
+```{r}
+UN_UNESCO <- merge(UN, UNESCO, by = 'Country')
+```
+
+```{r}
+n_distinct(UN_UNESCO$Country)
+```
+```{r}
+UN_UNESCO %>% 
+  filter(Country == 'Iran (Islamic Republic of)')
+```
+
