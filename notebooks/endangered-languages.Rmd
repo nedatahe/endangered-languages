@@ -17,8 +17,8 @@ UN <- UN %>%
 
 ```{r}
 UNESCO <- UNESCO %>% 
-    mutate(Country = strsplit(Country, ",")) %>% 
-    unnest(Country)
+  mutate(Country = strsplit(Country, ",")) %>% 
+  unnest(Country)
 ```
 
 ```{r}
@@ -111,25 +111,45 @@ UN_combined <-
   full_join(migrants) %>% 
   full_join(tourism) %>% 
   full_join(population) 
-  #, CO2, species, education, health, internet, land, migrants, tourism, population)
+#, CO2, species, education, health, internet, land, migrants, tourism, population)
 
 ```
 
-
-```{r}
-UN_UNESCO <- left_join(UNESCO, UN_combined, on = 'Country')
-```
 
 ```{r}
 write.csv(UN_UNESCO,'../data/UN_UNESCO.csv')
 ```
 
 ```{r}
-n_distinct(UN_UNESCO$Country)
+UN_UNESCO <- right_join(UN_combined, UNESCO, on = 'Country')
 ```
 ```{r}
-UN_UNESCO %>% 
-  filter(Country == 'Iran (Islamic Republic of)')
+UN_UNESCO <- 
+  rename(UN_UNESCO, c('location_description' = 'Description of the location', 'english_name' = 'Name in English', 'french_name' = 'Name in French', 'spanish_name' = 'Name in Spanish', 'ISO639-3_codes' = 'ISO639-3 codes', 'endangerement_degree' = 'Degree of endangerment', 'alternate_names' = 'Alternate names', 'name_in_the_language' = 'Name in the language', 'number_of_speakers' = 'Number of speakers'))
+
 ```
 
+```{r}
+UN_UNESCO
+```
+
+```{r}
+library(sf)
+library(leaflet)
+```
+
+
+```{r}
+leaflet(data = UN_UNESCO) %>% 
+  addTiles() %>%
+  addMarkers(~Longitude, ~Latitude, markercolor = ~palette1(UN_UNESCO$endangerement_degree), popup = paste( "<b>English name:</b>", UN_UNESCO$english_name,"<br>",
+                                                   "<b>French name:</b>", UN_UNESCO$french_name,"<br>",
+                                                   "<b>Spanish name:</b>", UN_UNESCO$spanish_name, "<br>",
+                                                   "<b>ISO639-3 code:</b>", UN_UNESCO$`ISO639-3_codes`,"<br>",
+                                                   "<b>Alternate name:</b>", UN_UNESCO$alternate_names,"<br>",
+                                                   "<b>Number of speakers:</b>", UN_UNESCO$number_of_speakers,"<br>",
+                                                   
+                                                   "<b>Specific location(s):</b>", UN_UNESCO$location_description,"<br>"
+  ) )
+```
 
