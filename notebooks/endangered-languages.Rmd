@@ -125,13 +125,18 @@ UN_UNESCO <- right_join(UN_combined, UNESCO, on = 'Country')
 ```
 ```{r}
 UN_UNESCO <- 
-  rename(UN_UNESCO, c('location_description' = 'Description of the location', 'english_name' = 'Name in English', 'french_name' = 'Name in French', 'spanish_name' = 'Name in Spanish', 'ISO639-3_codes' = 'ISO639-3 codes', 'endangerement_degree' = 'Degree of endangerment', 'alternate_names' = 'Alternate names', 'name_in_the_language' = 'Name in the language', 'number_of_speakers' = 'Number of speakers'))
+  rename(UN_UNESCO, c('location_description' = 'Description of the location', 
+                      'english_name' = 'Name in English',
+                      'french_name' = 'Name in French',
+                      'spanish_name' = 'Name in Spanish',
+                      'ISO639-3_codes' = 'ISO639-3 codes',
+                      'endangerement_degree' = 'Degree of endangerment', 
+                      'alternate_names' = 'Alternate names', 
+                      'name_in_the_language' = 'Name in the language', 
+                      'number_of_speakers' = 'Number of speakers'))
 
 ```
 
-```{r}
-UN_UNESCO
-```
 
 ```{r}
 library(sf)
