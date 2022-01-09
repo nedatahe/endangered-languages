@@ -10,13 +10,118 @@ UNESCO <- read_csv('../data/UNESCO-2011.csv')
 UN <- read_csv('../data/UN-data.csv')
 ```
 ```{r}
+UN <- UN %>% 
+  filter(Year == 2010)
+```
+
+
+```{r}
 UNESCO <- UNESCO %>% 
     mutate(Country = strsplit(Country, ",")) %>% 
     unnest(Country)
 ```
 
 ```{r}
-UN_UNESCO <- merge(UN, UNESCO, by = 'Country')
+GDP <-
+  UN %>% 
+  filter(topic == 'GDP per capita (US dollars)' & Series == 'GDP per capita (US dollars)') %>%
+  select(Country, country_GDP_per_capita_US_dollars = Value)
+```
+
+```{r}
+RD <-
+  UN %>% 
+  filter(topic == 'domestic expenditure in RD' & Series == 'Gross domestic expenditure on R & D: as a percentage of GDP (%)') %>% 
+  select(Country, country_RD_exp_as_GDP_percentage = Value)
+```
+
+```{r}
+CO2 <-
+  UN %>% 
+  filter(topic == 'CO2 emission' & Series == 'Emissions per capita (metric tons of carbon dioxide)')%>% 
+  select(Country, country_CO2_tons_per_capita = Value)
+```
+
+```{r}
+species <-
+  UN %>% 
+  filter(topic == 'threatened species' & Series == 'Threatened Species: Total (number)')%>% 
+  select(Country, country_threatened_species_total_num = Value)
+```
+
+```{r}
+education <-
+  UN %>% 
+  filter(topic == 'expenditure on edu' & Series == 'Public expenditure on education (% of GDP)')%>% 
+  select(Country, country_edu_exp_as_GDP_percentage = Value)
+```
+
+```{r}
+health <-
+  UN %>% 
+  filter(topic == 'expenditure on health' & Series == 'Current health expenditure (% of GDP)')%>% 
+  select(Country, country_health_exp_as_GDP_percentage = Value)
+```
+
+```{r}
+internet <-
+  UN %>% 
+  filter(topic == 'internet usage' & Series == 'Percentage of individuals using the internet')%>% 
+  select(Country, country_individuals_using_internet_percentage = Value)
+```
+
+```{r}
+land <-
+  UN %>% 
+  filter(topic == 'land' & Series == 'Land area (thousand hectares)')%>% 
+  select(Country, country_land_area_thousand_hectars = Value)
+```
+
+```{r}
+migrants <-
+  UN %>% 
+  filter(topic == 'migrants' & Series == 'International migrant stock: Both sexes (% total population)')%>% 
+  select(Country, country_international_migrants_population_percentage = Value)
+
+```
+
+```{r}
+tourism <-
+  UN %>% 
+  filter(topic == 'tourism' & Series == 'Tourist/visitor arrivals (thousands)')%>% 
+  select(Country, country_tourists_thousand = Value)
+```
+
+```{r}
+population <-
+  UN %>% 
+  filter(topic == 'population' & Series == 'Population mid-year estimates (millions)')%>% 
+  select(Country, country_population_millions = Value)
+```
+
+```{r}
+UN_combined <-
+  full_join(GDP, RD) %>% 
+  full_join(CO2) %>% 
+  full_join(species) %>% 
+  full_join(education) %>% 
+  full_join(health) %>% 
+  full_join(internet) %>% 
+  full_join(land) %>% 
+  full_join(migrants) %>% 
+  full_join(tourism) %>% 
+  full_join(population) 
+  #, CO2, species, education, health, internet, land, migrants, tourism, population)
+
+```
+
+
+```{r}
+UN_UNESCO <- left_join(UNESCO, UN_combined, on = 'Country')
+```
+
+```{r}
+write.csv(UN_UNESCO,'../data/UN_UNESCO.csv')
 ```
 
 ```{r}
@@ -26,4 +131,5 @@ n_distinct(UN_UNESCO$Country)
 UN_UNESCO %>% 
   filter(Country == 'Iran (Islamic Republic of)')
 ```
+
 
