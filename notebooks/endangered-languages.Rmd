@@ -130,7 +130,7 @@ UN_UNESCO <-
                       'french_name' = 'Name in French',
                       'spanish_name' = 'Name in Spanish',
                       'ISO639-3_codes' = 'ISO639-3 codes',
-                      'endangerement_degree' = 'Degree of endangerment', 
+                      'endangerment_degree' = 'Degree of endangerment', 
                       'alternate_names' = 'Alternate names', 
                       'name_in_the_language' = 'Name in the language', 
                       'number_of_speakers' = 'Number of speakers'))
@@ -141,20 +141,103 @@ UN_UNESCO <-
 ```{r}
 library(sf)
 library(leaflet)
+library(htmltools)
+```
+
+```{r}
+critical <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Critically endangered')
+definite <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Definitely endangered')
+extinct <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Extinct')
+severe <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Severely endangered')
+vulnerable <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Vulnerable')
 ```
 
 
 ```{r}
-leaflet(data = UN_UNESCO) %>% 
-  addTiles() %>%
-  addMarkers(~Longitude, ~Latitude, markercolor = ~palette1(UN_UNESCO$endangerement_degree), popup = paste( "<b>English name:</b>", UN_UNESCO$english_name,"<br>",
-                                                   "<b>French name:</b>", UN_UNESCO$french_name,"<br>",
-                                                   "<b>Spanish name:</b>", UN_UNESCO$spanish_name, "<br>",
-                                                   "<b>ISO639-3 code:</b>", UN_UNESCO$`ISO639-3_codes`,"<br>",
-                                                   "<b>Alternate name:</b>", UN_UNESCO$alternate_names,"<br>",
-                                                   "<b>Number of speakers:</b>", UN_UNESCO$number_of_speakers,"<br>",
-                                                   
-                                                   "<b>Specific location(s):</b>", UN_UNESCO$location_description,"<br>"
-  ) )
+
+popup <- paste0("<b>English name:</b>", UN_UNESCO$english_name,"<br>",
+                "<b>French name:</b>", UN_UNESCO$french_name,"<br>",
+                "<b>Spanish name:</b>", UN_UNESCO$spanish_name, "<br>",
+                
+                "<b>ISO639-3 code:</b>", UN_UNESCO$`ISO639-3_codes`,"<br>",
+                "<b>Alternate name:</b>", UN_UNESCO$alternate_names,"<br>",
+                "<b>Endangerment degree:</b>", UN_UNESCO$endangerment_degree,"<br>",
+                "<b>Number of speakers:</b>", UN_UNESCO$number_of_speakers,"<br>",
+                "<b>Country:</b>", UN_UNESCO$Country,"<br>",
+                
+                "<b>Specific location(s):</b>",  UN_UNESCO$location_description,"<br>"
+)
+
+
+
+leaflet() %>% 
+  addProviderTiles(provider = "Esri") %>% 
+  
+  addCircleMarkers(data = vulnerable, radius = log10(UN_UNESCO$number_of_speakers), opacity = .6, color = 'cornsilk2', group = 'Vulnerable',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = popup)  %>%
+  
+  addCircleMarkers(data = definite, radius = log10(UN_UNESCO$number_of_speakers), opacity = .6, color = 'yellow', group = 'Definitely endangered',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = popup)  %>%
+  
+  addCircleMarkers(data = critical, radius = log10(UN_UNESCO$number_of_speakers), opacity = .6, color = 'orange', group = 'Critically endangered',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = popup)  %>%
+  
+  addCircleMarkers(data = severe, radius = log10(UN_UNESCO$number_of_speakers), opacity = .6, color = 'red', group = 'Severely endangered',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = popup)  %>%
+  
+  addCircleMarkers(data = extinct, radius = log10(UN_UNESCO$number_of_speakers), opacity = .6, color = 'black', group = 'Extinct',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = popup)  %>%
+  
+  addLayersControl(overlayGroups = c('Vulnerable', 'Definitely endangered', 'Critically endangered', 'Severely endangered', 'Extinct')) %>% 
+  addLegend(pal = pal, position = 'bottomright', values = c("Vulnerable",
+                                                            "Definitely endangered",
+                                                            "Severely endangered", 
+                                                            "Critically endangered",
+                                                            "Extinct"), title = 'Endangerment degrees' 
+  )
 ```
+```{r}
+UN_UNESCO %>% 
+  group_by(endangerment_degree) %>% 
+  count() %>% 
+  arrange(desc(n))'
+```
+  
+  
+```{r}
+UN_UNESCO %>% 
+   ggplot(aes(x = endangerment_degree, y = country_threatened_species_total_num)) + 
+geom_boxplot()
+```
+
+  
+ 
+
+
+
+
+ 
+```{r}
+ a<- UN_UNESCO %>% 
+  ggplot(aes(fill = as_factor(country_GDP_per_capita_US_dollars), x = endangerment_degree)) +
+  geom_bar(position='fill') +
+    scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+ggplotly(a)
+```
+
 
