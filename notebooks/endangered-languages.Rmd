@@ -139,6 +139,26 @@ UN_UNESCO <-
 
 ```
 
+```{r}
+g_languages <- read_csv('../data/glottolog_languages.csv')
+g_areas <- read_csv('../data/glottolog_areas.csv')
+g_families <- read_csv('../data/glottolog_families.csv')
+```
+
+```{r}
+glottolog <- 
+  full_join(g_languages, g_areas, by = 'english_name') %>% 
+  full_join(g_families, by = 'family_id')
+```
+
+```{r}
+glottolog <- select(glottolog, -'family_id')
+```
+
+
+```{r}
+UN_UNESCO <- left_join(UN_UNESCO, glottolog)
+```
 
 ```{r}
 library(sf)
@@ -186,6 +206,7 @@ make_popups <- function(dataframe){
                  "<b>Spanish name:</b>", dataframe$spanish_name, "<br>",
                  
                  "<b>ISO639-3 code:</b>", dataframe$`ISO639-3_codes`,"<br>",
+                 "<b>Family:</b>", dataframe$family,"<br>",
                  "<b>Alternate name:</b>", dataframe$alternate_names,"<br>",
                  "<b>Endangerment degree:</b>", dataframe$endangerment_degree,"<br>",
                  "<b>Number of speakers:</b>", dataframe$number_of_speakers,"<br>",
@@ -269,26 +290,7 @@ ggplot(aes(y =country_GDP_per_capita_US_dollars, x = vitality_level_mean, colour
 ```
 
 
-```{r}
-g_languages <- read_csv('../data/glottolog_languages.csv')
-g_areas <- read_csv('../data/glottolog_areas.csv')
-g_families <- read_csv('../data/glottolog_families.csv')
-```
 
-```{r}
-glottolog <- 
-  full_join(g_languages, g_areas, by = 'english_name') %>% 
-  full_join(g_families, by = 'family_id')
-```
-
-```{r}
-glottolog <- select(glottolog, -'family_id')
-```
-
-
-```{r}
-UN_UNESCO <- left_join(UN_UNESCO, glottolog)
-```
 
 
 ```{r}
