@@ -116,13 +116,15 @@ UN_combined <-
 ```
 
 
-```{r}
-write.csv(UN_UNESCO,'../data/UN_UNESCO.csv')
-```
+
 
 ```{r}
 UN_UNESCO <- right_join(UN_combined, UNESCO, on = 'Country')
 ```
+```{r}
+write.csv(UN_UNESCO,'../data/UN_UNESCO.csv')
+```
+
 ```{r}
 UN_UNESCO <- 
   rename(UN_UNESCO, c('location_description' = 'Description of the location', 
@@ -156,37 +158,78 @@ UN_UNESCO <- UN_UNESCO %>%
 
 
 ```{r}
+critical <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Critically endangered')
+definite <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Definitely endangered')
+extinct <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Extinct')
+severe <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Severely endangered')
+vulnerable <- UN_UNESCO %>% 
+  filter(endangerment_degree == 'Vulnerable')
+```
+
+
+```{r}
+
 pal <- colorFactor(palette = c('navajowhite2', 'yellow', 'orange', 'red', 'black'), 
                    levels = c("Vulnerable",
                               "Definitely endangered",
                               "Severely endangered", 
                               "Critically endangered",
                               "Extinct"))
+make_popups <- function(dataframe){
+  
+  popup <- paste("<b>English name:</b>", dataframe$english_name,"<br>",
+                 "<b>French name:</b>", dataframe$french_name,"<br>",
+                 "<b>Spanish name:</b>", dataframe$spanish_name, "<br>",
+                 
+                 "<b>ISO639-3 code:</b>", dataframe$`ISO639-3_codes`,"<br>",
+                 "<b>Alternate name:</b>", dataframe$alternate_names,"<br>",
+                 "<b>Endangerment degree:</b>", dataframe$endangerment_degree,"<br>",
+                 "<b>Number of speakers:</b>", dataframe$number_of_speakers,"<br>",
+                 "<b>Country:</b>", dataframe$Country,"<br>",
+                 
+                 "<b>Specific location(s):</b>",  dataframe$location_description,"<br>"
+  )
+return(popup)
+  }
 
-
-popup <- paste("<b>English name:</b>", UN_UNESCO$english_name,"<br>",
-               "<b>French name:</b>", UN_UNESCO$french_name,"<br>",
-               "<b>Spanish name:</b>", UN_UNESCO$spanish_name, "<br>",
-               
-               "<b>ISO639-3 code:</b>", UN_UNESCO$`ISO639-3_codes`,"<br>",
-               "<b>Alternate name:</b>", UN_UNESCO$alternate_names,"<br>",
-               "<b>Endangerment degree:</b>", UN_UNESCO$endangerment_degree,"<br>",
-               "<b>Number of speakers:</b>", UN_UNESCO$number_of_speakers,"<br>",
-               "<b>Country:</b>", UN_UNESCO$Country,"<br>",
-               
-               "<b>Specific location(s):</b>",  UN_UNESCO$location_description,"<br>"
-)
+#make_popups(UN_UNESCO)
 
 
 
 leaflet() %>% 
   addProviderTiles(provider = "Esri") %>% 
   
-  addCircleMarkers(data = UN_UNESCO, radius = log10(UN_UNESCO$number_of_speakers), opacity = .6, color = pal(UN_UNESCO$endangerment_degree),
+  addCircleMarkers(data = vulnerable, radius = log10(vulnerable$number_of_speakers), opacity = .6, color = pal(vulnerable$endangerment_degree), group = 'Vulnerable',
                    lng = ~Longitude, 
                    lat = ~Latitude,
-                   popup = popup) %>% 
-  addLegend(pal= pal, position = 'bottomright', values = factor(UN_UNESCO$endangerment_degree), title = 'Endangerment degree' 
+                   popup = make_popups(vulnerable))  %>%
+  
+  addCircleMarkers(data = definite, radius = log10(definite$number_of_speakers), opacity = .6, color = pal(definite$endangerment_degree), group = 'Definitely endangered',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = make_popups(definite))  %>%
+  
+  addCircleMarkers(data = critical, radius = log10(critical$number_of_speakers), opacity = .6, color = pal(critical$endangerment_degree), group = 'Critically endangered',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = make_popups(critical))  %>%
+  
+  addCircleMarkers(data = severe, radius = log10(severe$number_of_speakers), opacity = .6, color = pal(severe$endangerment_degree), group = 'Severely endangered',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = make_popups(severe))  %>%
+  
+  addCircleMarkers(data = extinct, radius = log10(extinct$number_of_speakers), opacity = .6, color = pal(extinct$endangerment_degree), group = 'Extinct',
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = make_popups(extinct))  %>%
+  
+  addLayersControl(overlayGroups = c('Vulnerable', 'Definitely endangered', 'Critically endangered', 'Severely endangered', 'Extinct')) %>% 
+  addLegend(pal = pal, position = 'bottomright', values = factor(UN_UNESCO$endangerment_degree), title = 'Endangerment degrees' 
   )
 ```
 
@@ -195,18 +238,57 @@ leaflet() %>%
 UN_UNESCO %>% 
   group_by(endangerment_degree) %>% 
   count() %>% 
-  arrange(desc(n))'
+  arrange(desc(n))
 ```
 
 
 
 ```{r}
+UN_UNESCO <- 
+  UN_UNESCO %>% 
+  mutate(vitality_level = case_when(
+    endangerment_degree == 'Exticnt' ~ 1,
+    endangerment_degree == 'Critically endangered' ~ 2,
+    endangerment_degree == 'Severely endangered' ~ 3,
+    endangerment_degree == 'Definitely endangered' ~ 4,
+    endangerment_degree == 'Vulnerable' ~ 5))
+```
+
+```{r}
+UN_UNESCO <- 
+  UN_UNESCO %>% 
+  group_by(Country) %>% 
+  mutate(vitality_level_mean = mean(vitality_level, na.rm = T))
+```
+
+```{r}
 UN_UNESCO %>% 
-  ggplot(aes(x = endangerment_degree, y = country_threatened_species_total_num)) + 
-  geom_boxplot()
+  group_by(Country) %>% 
+ggplot(aes(y =country_GDP_per_capita_US_dollars, x = vitality_level_mean, colour = )) +
+  geom_point() 
 ```
 
 
+```{r}
+g_languages <- read_csv('../data/glottolog_languages.csv')
+g_areas <- read_csv('../data/glottolog_areas.csv')
+g_families <- read_csv('../data/glottolog_families.csv')
+```
+
+```{r}
+glottolog <- 
+  full_join(g_languages, g_areas, by = 'english_name') %>% 
+  full_join(g_families, by = 'family_id')
+```
+
+```{r}
+glottolog <- select(glottolog, -'family_id')
+```
+
+
+```{r}
+UN_UNESCO <- left_join(UN_UNESCO, glottolog)
+```
 
 
 ```{r}
