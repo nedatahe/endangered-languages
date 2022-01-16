@@ -7,7 +7,7 @@ UNESCO <- read_csv('../data/UNESCO-2011.csv')
 ```
 
 ```{r}
-UN <- read_csv('../data/UN-data.csv')
+UN <- read_csv('../data/UN.csv')
 ```
 ```{r}
 UN <- UN %>% 
@@ -177,6 +177,8 @@ UN_UNESCO <- UN_UNESCO %>%
 ```
 
 
+
+
 ```{r}
 critical <- UN_UNESCO %>% 
   filter(endangerment_degree == 'Critically endangered')
@@ -283,14 +285,34 @@ UN_UNESCO <-
 ```
 
 ```{r}
-UN_UNESCO %>% 
-  group_by(Country) %>% 
-ggplot(aes(y =country_GDP_per_capita_US_dollars, x = vitality_level_mean, colour = )) +
-  geom_point() 
+country_names <- UN_UNESCO %>% 
+  distinct(Country) %>% 
+  lst()
 ```
 
 
+```{r}
+write.csv(UN_UNESCO,'../data/UN_UNESCO.csv')
+write.csv(UN,'../data/UN.csv')
+```
 
+```{r}
+UN_UNESCO %>% 
+  group_by(Country) %>% 
+ggplot(aes(y =vitality_level_mean, x = country_GDP_per_capita_US_dollars)) +
+  geom_point() 
+```
+```{r}
+UN_UNESCO %>% 
+      group_by(Country) %>% 
+      ggplot(aes(x =country_population_millions)) +
+               geom_bar()
+```
+
+```{r}
+UN_UNESCO %>% 
+  max(number_of_speakers, na.rm = F)
+```
 
 
 ```{r}
@@ -301,4 +323,38 @@ a<- UN_UNESCO %>%
 ggplotly(a)
 ```
 
+```{r}
+popup <- paste("<b>English name:</b>", UN_UNESCO$english_name,"<br>",
+               "<b>French name:</b>", UN_UNESCO$french_name,"<br>",
+               "<b>Spanish name:</b>", UN_UNESCO$spanish_name, "<br>",
+               
+               "<b>ISO639-3 code:</b>", UN_UNESCO$`ISO639-3_codes`,"<br>",
+               "<b>Alternate name:</b>", UN_UNESCO$alternate_names,"<br>",
+               "<b>Endangerment degree:</b>", UN_UNESCO$endangerment_degree,"<br>",
+               "<b>Number of speakers:</b>", UN_UNESCO$number_of_speakers,"<br>",
+               "<b>Country:</b>", UN_UNESCO$Country,"<br>",
+               
+               "<b>Specific location(s):</b>",  UN_UNESCO$location_description,"<br>"
+)
+
+
+leaflet() %>% 
+  addProviderTiles(provider = "Esri") %>% 
+  
+  addCircleMarkers(data = UN_UNESCO, radius = log10(UN_UNESCO$number_of_speakers), opacity = .6, color = pal(UN_UNESCO$endangerment_degree),
+                   lng = ~Longitude, 
+                   lat = ~Latitude,
+                   popup = popup) %>% 
+    addLegend(pal = pal, position = 'bottomright', values = factor(UN_UNESCO$endangerment_degree), title = 'Endangerment degrees'  
+  )
+
+```
+```{r}
+UN_UNESCO %>%
+  group_by(Country) %>% 
+  ggplot(aes(x = endangerment_degree, number_of_speakers)) +
+           geom_col()
+         
+```
+everything <- 
 
