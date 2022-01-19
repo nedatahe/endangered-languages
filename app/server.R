@@ -153,14 +153,25 @@ shinyServer(function(input, output) {
     })
   })
   
-  # observe({
-  #   output$ScatterPlot <- renderPlot({
-  #     UN_UNESCO %>% 
-  #       group_by(input$country) %>% 
-  #       ggplot(aes_string(y = 'country_vitality_level', x = input$country_variable, color = 'country_vitality_level')) +
-  #       geom_point()
-  #     
-  #   })
-  # })
+  
+  observe({
+    output$ScatterPlot <-
+      renderPlotly({
+        plot2 <-
+    UN_UNESCO %>%
+    group_by(input$Country) %>%
+    mutate(language_count = length(unique(english_name))) %>% 
+    ggplot(aes_string(y = 'country_vitality_level', 
+               x = input$country_variable, 
+               size = 'language_count',
+               
+               color = 'Continent'
+    )) +
+    geom_smooth(method = 'lm', formula = y ~ x, color = "blue", size = .1)+
+    geom_point(aes(text = Country), alpha = .5)
+  ggplotly(plot2, tooltip = "text")
+  
+  })
+  })
   
 })

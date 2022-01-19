@@ -4,7 +4,7 @@ library(sf)
 library(leaflet)
 library(htmltools)
 library(shiny)
-
+library(plotly)
 
 UN_UNESCO <- read_csv('UN_UNESCO.csv')
 
