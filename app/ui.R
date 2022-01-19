@@ -11,7 +11,7 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
-  # Application title
+ 
   h1("Endangered Languages of the World"),
   
   fluidRow(
@@ -67,24 +67,30 @@ shinyUI(fluidPage(
         multiple = TRUE
       )
     ),
-    column(4,
+    column(2,
            numericInput(
              "min_speakers",
              "Minimum number of speakers:",
              value = NULL
            )),
-    column(4,
+    column(2,
            numericInput(
              "max_speakers",
              "Maximum number of speakers:",
              value = NULL
+           )),
+    column(4,
+           selectInput(
+             "country_variable",
+             "Country variable:",
+             choices = c("CO2 Emissions" = 'co2_emissions_percapita_metric_tons')
            ))),
     fluidRow(column(8,
                     leafletOutput('WorldMap')),
              column(
                4,
-               plotOutput("PercentageBarPlot"),
-               plotOutput('NumberBarPlot')
+               plotlyOutput("BarPlot")
              ))
   )
 )
+

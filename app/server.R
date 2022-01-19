@@ -90,9 +90,17 @@ shinyServer(function(input, output) {
           "<br>"
         )
       
+      pal <- colorFactor(palette = c('navajowhite2', 'yellow', 'orange', 'red', 'black'), 
+                         levels = c("Vulnerable",
+                                    "Definitely endangered",
+                                    "Severely endangered", 
+                                    "Critically endangered",
+                                    "Extinct"))
+      
+      
       
       leaflet() %>%
-        addProviderTiles(provider = "Esri") %>%
+        addProviderTiles(provider = "Esri", options = providerTileOptions(maxZoom = 6)) %>%
         
         addCircleMarkers(
           data = filtered_df,
@@ -113,24 +121,46 @@ shinyServer(function(input, output) {
     })
     
   })
-  output$PercentageBarPlot <- renderPlot({
-    if (input$country == 'All') {
-      data <- UN_UNESCO
-    }
-    else{
-      data <- UN_UNESCO %>% filter(Country == input$country)
-    }
-    data %>%
-      group_by(Country) %>%
-      ggplot(aes(x = endangerment_degree, number_of_speakers)) +
-      geom_col()
-    
+  
+  observe({
+    output$BarPlot <- renderPlotly({
+      
+      plot <- UN_UNESCO %>% 
+        {if (input$country == 'All') . else filter(., Country == input$country)} %>% 
+        group_by(endangerment_degree) %>% 
+        count() %>% 
+        mutate(Percentage = round(100 *(n/sum(.$n)), digits = 2))%>%
+        mutate(Levels = 'Endangerment Degree') %>% 
+        arrange(ascending = T) %>% 
+        ggplot(aes(x = Levels,
+                   y = Percentage, 
+                   fill = endangerment_degree,
+                   text = sprintf('Count: %s', n))) +
+        geom_col()+
+        geom_text(aes(label = paste(Percentage, '%')), 
+                  position = position_stack(vjust = 0.5), color = 'springgreen4', size = 3)+
+        
+        
+        scale_fill_manual(values = c(
+          "Vulnerable" = "navajowhite2",
+          "Critically endangered" = "red",
+          "Extinct" = "black", 
+          "Severely endangered" = "orange",
+          "Definitely endangered" =  "yellow"
+        ))
+      
+      ggplotly(plot, tooltip = "text")
+    })
   })
-  #
-  # output$NumberBarPlot <- renderPlot({
-  #   UN_UNESCO %>%
-  #     group_by(Country) %>%
-  #     ggplot(aes(x = country_population_millions)) +
-  #     geom_bar()
+  
+  # observe({
+  #   output$ScatterPlot <- renderPlot({
+  #     UN_UNESCO %>% 
+  #       group_by(input$country) %>% 
+  #       ggplot(aes_string(y = 'country_vitality_level', x = input$country_variable, color = 'country_vitality_level')) +
+  #       geom_point()
+  #     
+  #   })
   # })
+  
 })
