@@ -67,7 +67,9 @@ shinyUI(fluidPage(
               
             ),
             multiple = TRUE
-          )
+          ),
+          br(), 
+          textOutput('PopNumber')
         ),
         column(
           4,

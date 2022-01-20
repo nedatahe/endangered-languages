@@ -11,51 +11,64 @@ library(shiny)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
+
   observe({
-    output$WorldMap <- renderLeaflet({
-      filtered_df <- UN_UNESCO
-      
-      if (input$country != 'All') {
-        filtered_df <- filter(filtered_df, Country == input$country)
+    filtered_df <- UN_UNESCO
+    
+    if (input$country != 'All') {
+      filtered_df <- filter(filtered_df, Country == input$country)
+    }
+    if (input$language != 'All') {
+      filtered_df <- filter(filtered_df, english_name == input$language)
+    }
+    if (input$iso != 'All') {
+      filtered_df <- filter(filtered_df, `ISO639-3_codes` == input$iso)
+    }
+    #multi select makes a vector: different syntax
+    if (!is.null(input$endangerment) &
+        !any(input$endangerment %in% 'All')) {
+      filtered_df <-
+        filter(filtered_df,
+               endangerment_degree %in% input$endangerment)
+    }
+    
+    if (!is.na(input$min_speakers)  |
+        !is.na(input$max_speakers)) {
+      if (!is.na(input$min_speakers) & !is.na(input$max_speakers)) {
+        filtered_df <-
+          filter(
+            filtered_df,
+            between(
+              number_of_speakers,
+              input$min_speakers,
+              input$max_speakers
+            )
+          )
       }
-      if (input$language != 'All') {
-        filtered_df <- filter(filtered_df, english_name == input$language)
-      }
-      if (input$iso != 'All') {
-        filtered_df <- filter(filtered_df, `ISO639-3_codes` == input$iso)
-      }
-      #multi select makes a vector: different syntax
-      if (!is.null(input$endangerment) &
-          !any(input$endangerment %in% 'All')) {
+      if (is.na(input$min_speakers)) {
         filtered_df <-
           filter(filtered_df,
-                 endangerment_degree %in% input$endangerment)
+                 number_of_speakers <= input$max_speakers)
       }
-      
-      if (!is.na(input$min_speakers)  |
-          !is.na(input$max_speakers)) {
-        if (!is.na(input$min_speakers) & !is.na(input$max_speakers)) {
-          filtered_df <-
-            filter(
-              filtered_df,
-              between(
-                number_of_speakers,
-                input$min_speakers,
-                input$max_speakers
-              )
-            )
-        }
-        if (is.na(input$min_speakers)) {
-          filtered_df <-
-            filter(filtered_df,
-                   number_of_speakers <= input$max_speakers)
-        }
-        if (is.na(input$max_speakers)) {
-          filtered_df <-
-            filter(filtered_df,
-                   number_of_speakers >= input$min_speakers)
-        }
+      if (is.na(input$max_speakers)) {
+        filtered_df <-
+          filter(filtered_df,
+                 number_of_speakers >= input$min_speakers)
       }
+    }
+    
+    output$PopNumber <- renderText(
+      {
+        total_speakers <-
+          filtered_df %>% 
+          group_by(english_name) %>% 
+          summarize(total_speakers = sum(number_of_speakers)
+      }
+    )
+    
+    
+    output$WorldMap <- renderLeaflet({
+     
       
       popup <-
         paste(
@@ -159,7 +172,7 @@ shinyServer(function(input, output) {
       renderPlotly({
         plot2 <-
     UN_UNESCO %>%
-    group_by(input$Country) %>%
+    group_by(Country) %>%
     mutate(language_count = length(unique(english_name))) %>% 
     ggplot(aes_string(y = 'country_vitality_level', 
                x = input$country_variable, 
@@ -168,7 +181,8 @@ shinyServer(function(input, output) {
                color = 'Continent'
     )) +
     geom_smooth(method = 'lm', formula = y ~ x, color = "blue", size = .1)+
-    geom_point(aes(text = Country), alpha = .5)
+    geom_point(aes(text = Country), alpha = .5)+
+          scale_x_log10(labels = scales::comma)
   ggplotly(plot2, tooltip = "text")
   
   })
