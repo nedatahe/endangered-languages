@@ -60,9 +60,13 @@ shinyServer(function(input, output) {
     output$PopNumber <- renderText(
       {
         total_speakers <-
-          filtered_df %>% 
-          group_by(english_name) %>% 
-          summarize(total_speakers = sum(number_of_speakers)
+          filtered_df%>% 
+          summarize(language_count = length(unique(english_name)), 
+                    speakers_count = sum(number_of_speakers, na.rm = T))
+        
+        str_interp('Total endangered languages: ${total_speakers$language_count}. 
+                   Total speakers: ${format(total_speakers$speakers_count, big.mark=",", scientific=FALSE, trim=TRUE)}')
+        
       }
     )
     
@@ -174,9 +178,9 @@ shinyServer(function(input, output) {
     UN_UNESCO %>%
     group_by(Country) %>%
     mutate(language_count = length(unique(english_name))) %>% 
-    ggplot(aes_string(y = 'country_vitality_level', 
+    ggplot(aes_string(y = 'endangered_proportion', 
                x = input$country_variable, 
-               size = 'language_count',
+               size = 'number_of_speakers',
                
                color = 'Continent'
     )) +

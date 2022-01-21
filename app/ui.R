@@ -67,9 +67,7 @@ shinyUI(fluidPage(
               
             ),
             multiple = TRUE
-          ),
-          br(), 
-          textOutput('PopNumber')
+          )
         ),
         column(
           4,
@@ -85,6 +83,7 @@ shinyUI(fluidPage(
         )
       ),
       fluidRow(column(8,
+                      textOutput('PopNumber'),
                       leafletOutput('WorldMap')),
                column(4,
                       plotlyOutput("BarPlot")))
