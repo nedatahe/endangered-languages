@@ -11,11 +11,11 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
-  h1("Endangered Languages of the World"),
   tabsetPanel(
     type = 'tabs',
     tabPanel(
       'Language Map',
+      h1("Global Map of Endangered Languages",style = "font-size:25px;"),
       fluidRow(
         column(4,
                selectInput(
@@ -92,6 +92,7 @@ shinyUI(fluidPage(
     ,
     tabPanel(
       'Vitality Correlator',
+      h1("Economic Indicators and Language Endangerment",style = "font-size:25px;"),
       selectInput(
         "country_variable",
         "Country variable:",
@@ -107,9 +108,9 @@ shinyUI(fluidPage(
                     'The Number of International Migrants' = 'international_migrants_number', 
                     'Threatened Species Total Number' = 'threatened_species_total_number', 
                     'Tourist arrivals (Thousands)' = 'tourist_arrivals_thousands')), 
-        plotlyOutput('ScatterPlot')
-        
-      )
+      plotlyOutput('ScatterPlot')
+      
     )
   )
+)
 )

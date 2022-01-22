@@ -11,7 +11,7 @@ library(shiny)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
-
+  
   observe({
     filtered_df <- UN_UNESCO
     
@@ -72,7 +72,7 @@ shinyServer(function(input, output) {
     
     
     output$WorldMap <- renderLeaflet({
-     
+      
       
       popup <-
         paste(
@@ -107,7 +107,7 @@ shinyServer(function(input, output) {
           "<br>"
         )
       
-      pal <- colorFactor(palette = c('navajowhite2', 'yellow', 'orange', 'red', 'black'), 
+      pal <- colorFactor(palette = c('khaki4', 'yellow', 'orange', 'red', 'black'), 
                          levels = c("Vulnerable",
                                     "Definitely endangered",
                                     "Severely endangered", 
@@ -153,18 +153,23 @@ shinyServer(function(input, output) {
                    y = Percentage, 
                    fill = endangerment_degree,
                    text = sprintf('Count: %s', n))) +
+         labs(fill = "Endangerment Degree")+
         geom_col()+
+        
         geom_text(aes(label = paste(Percentage, '%')), 
                   position = position_stack(vjust = 0.5), color = 'springgreen4', size = 3)+
         
         
         scale_fill_manual(values = c(
-          "Vulnerable" = "navajowhite2",
+          "Vulnerable" = "khaki4",
           "Critically endangered" = "red",
           "Extinct" = "black", 
           "Severely endangered" = "orange",
           "Definitely endangered" =  "yellow"
-        ))
+        ))+
+        theme(axis.title.x=element_blank(),
+              axis.text.x=element_blank(),
+              axis.ticks.x=element_blank())
       
       ggplotly(plot, tooltip = "text")
     })
@@ -175,21 +180,23 @@ shinyServer(function(input, output) {
     output$ScatterPlot <-
       renderPlotly({
         plot2 <-
-    UN_UNESCO %>%
-    group_by(Country) %>%
-    mutate(language_count = length(unique(english_name))) %>% 
-    ggplot(aes_string(y = 'endangered_proportion', 
-               x = input$country_variable, 
-               size = 'number_of_speakers',
-               
-               color = 'Continent'
-    )) +
-    geom_smooth(method = 'lm', formula = y ~ x, color = "blue", size = .1)+
-    geom_point(aes(text = Country), alpha = .5)+
-          scale_x_log10(labels = scales::comma)
-  ggplotly(plot2, tooltip = "text")
-  
-  })
+          UN_UNESCO %>%
+          group_by(Country) %>%
+          mutate(language_count = length(unique(english_name))) %>% 
+          ggplot(aes_string(y = 'endangered_proportion', 
+                            x = input$country_variable, 
+                        
+                            
+                            color = 'Continent'
+          )) +
+          labs(y = "Countrie's Proportion of Endangered Languages", x = names(choices[which(choices == input$country_variable)])) +
+          geom_smooth(method = 'lm', formula = y ~ x, color = "blue", size = .1)+
+          geom_point(aes(text = Country), alpha = .5)+
+          scale_x_log10(labels = scales::comma)+
+          scale_y_continuous(labels = function(x) paste0(x*100, "%"))
+        ggplotly(plot2, tooltip = "text")
+        
+      })
   })
   
 })
