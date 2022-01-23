@@ -72,7 +72,7 @@ These steps are required to run the app:
 
 Neda Taherkhani
 
-Email: neda.tahe[atsign]gmail.com
+Email: neda.tahe[AtSign]gmail.com
 
 LinKedin: https://www.linkedin.com/in/nedata/ 
 
