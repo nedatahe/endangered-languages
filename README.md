@@ -70,7 +70,9 @@ These steps are required to run the app:
 ## Author
 
 Neda Taherkhani
+
 Email: neda.tahe&gmail.com
+
 LinKedin: https://www.linkedin.com/in/nedata/ 
 
 ## Acknowledgments
