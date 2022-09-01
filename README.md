@@ -74,8 +74,8 @@ Neda Taherkhani
 
 Email: neda.tahe[AtSign]gmail.com
 
-LinKedin: https://www.linkedin.com/in/nedata/ 
+LinKedin: https://www.linkedin.com/in/nthrk/
 
 ## Acknowledgments
 
-Acknowledgements go to the instructor of the Data Science (5) bootcamp at Nashville Software School, Michael Halloway, and the TAs of the bootcamp, Veronica Ikeshoji-Orlati and Alvin Wendt. I also appreciate the role of Bryan Finlayson in helping me build and debug the app. 
+Acknowledgements go to the instructor of the Data Science (5) bootcamp at Nashville Software School, Michael Halloway, and the TAs of the bootcamp, Veronica Ikeshoji-Orlati and Alvin Wendt.
