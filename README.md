@@ -72,10 +72,6 @@ These steps are required to run the app:
 
 Neda Taherkhani
 
-Email: neda.tahe[AtSign]gmail.com
-
-LinKedin: https://www.linkedin.com/in/nthrk/
-
 ## Acknowledgments
 
 Acknowledgements go to the instructor of the Data Science (5) bootcamp at Nashville Software School, Michael Halloway, and the TAs of the bootcamp, Veronica Ikeshoji-Orlati and Alvin Wendt.
